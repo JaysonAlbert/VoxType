@@ -1,0 +1,11 @@
+.app {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.title {
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #333;
+}
