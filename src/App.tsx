@@ -20,7 +20,7 @@ function App() {
 
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-      <h1 style={{ marginBottom: '20px' }}>VoxType - 语音输入助手</h1>
+      <h1 style={{ marginBottom: '20px' }}>VoxType - Speech Input Assistant</h1>
 
       <MicRecorder
         isRecording={isRecording}
@@ -40,7 +40,7 @@ function App() {
             opacity: transcript ? 1 : 0.5,
           }}
         >
-          复制文本
+          Copy Text
         </button>
         <button
           onClick={handleClear}
@@ -51,7 +51,7 @@ function App() {
             opacity: transcript ? 1 : 0.5,
           }}
         >
-          清空
+          Clear
         </button>
       </div>
 
@@ -66,12 +66,12 @@ function App() {
         whiteSpace: 'pre-wrap',
         backgroundColor: '#f9f9f9',
       }}>
-        {transcript || <span style={{ color: '#999' }}>点击麦克风开始语音输入...</span>}
+        {transcript || <span style={{ color: '#999' }}>Click the microphone to start speech input...</span>}
       </div>
 
       {isAsrLoading && (
         <div style={{ marginTop: '10px', color: '#666' }}>
-          正在加载 Whisper ASR 模型，请稍候...
+          Loading Whisper ASR model, please wait...
         </div>
       )}
     </div>

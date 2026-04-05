@@ -24,7 +24,19 @@ export default function MicRecorder({
       setError(null)
       setIsAsrLoading(false)
 
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      console.log('Requesting microphone access...')
+      
+      // Check if getUserMedia is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Browser does not support getUserMedia API')
+      }
+
+      const constraints = { audio: true }
+      console.log('Audio constraints:', constraints)
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints)
+      console.log('Microphone access granted, stream:', stream)
+      
       mediaRecorderRef.current = new MediaRecorder(stream)
       audioChunksRef.current = []
 
@@ -36,26 +48,47 @@ export default function MicRecorder({
 
       mediaRecorderRef.current.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+        console.log('Audio blob created:', audioBlob.size, 'bytes')
 
-        // 调用 Tauri 后端进行 ASR 识别
+        // Call Tauri backend for ASR transcription
         try {
           const { invoke } = await import('@tauri-apps/api/core')
+          console.log('Calling ASR function...')
           const result = await invoke<string>('record_and_transcribe', { audioBlob })
+          console.log('ASR result:', result)
           onTranscript(result)
         } catch (err) {
           console.error('ASR error:', err)
-          setError('语音识别失败，请检查后端 ASR 服务')
+          setError('Speech recognition failed, check backend ASR service')
         }
 
-        // 清理流
+        // cleanup stream
         stream.getTracks().forEach(track => track.stop())
       }
 
       mediaRecorderRef.current.start()
       setIsRecording(true)
+      console.log('Recording started')
     } catch (err) {
-      console.error('麦克风访问失败:', err)
-      setError('无法访问麦克风，请检查权限设置')
+      const error = err as Error
+      console.error('Microphone access failed:', error)
+      console.error('Error name:', error.name)
+      console.error('Error message:', error.message)
+      
+      let errorMsg = 'Cannot access microphone'
+      if (error.name === 'NotAllowedError') {
+        errorMsg = 'Permission denied: Allow microphone access in browser settings'
+      } else if (error.name === 'NotFoundError') {
+        errorMsg = 'No microphone found'
+      } else if (error.name === 'NotReadableError') {
+        errorMsg = 'Microphone is in use by another app'
+      } else if (error.name === 'OverconstrainedError') {
+        errorMsg = 'Microphone constraints not met'
+      } else if (error.name === 'NotAllowedError') {
+        errorMsg = 'Permission denied'
+      }
+      
+      setError(errorMsg)
       setIsRecording(false)
     }
   }, [onTranscript, setIsRecording, setIsAsrLoading])
@@ -93,7 +126,7 @@ export default function MicRecorder({
         disabled={isAsrLoading}
         style={{ ...getButtonStyle(), opacity: isAsrLoading ? 0.5 : 1 }}
       >
-        {isRecording ? '停止录音' : '开始录音'}
+        {isRecording ? 'Stop Recording' : 'Start Recording'}
       </button>
 
       {error && (
@@ -102,7 +135,7 @@ export default function MicRecorder({
 
       {isAsrLoading && (
         <div style={{ color: '#666', fontSize: '14px' }}>
-          ASR 模型加载中...
+          Loading ASR model...
         </div>
       )}
     </div>
