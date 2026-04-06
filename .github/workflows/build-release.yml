@@ -65,17 +65,18 @@ jobs:
         run: npm ci
 
       - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          version: ${{ steps.package-version.outputs.version }}
+          tauriScript: npm run tauri
           tagName: v${{ steps.package-version.outputs.version }}
-          releaseTitle: 'VoxType v${{ steps.package-version.outputs.version }}'
+          releaseName: VoxType v${{ steps.package-version.outputs.version }}
           releaseBody: |
             ## VoxType v${{ steps.package-version.outputs.version }}
             
             - Native Whisper-rs integration
             - Improved speech recognition
             - Single executable installer
+          releaseDraft: false
+          prerelease: false
