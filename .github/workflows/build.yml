@@ -1,0 +1,51 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - release
+  pull_request:
+    branches:
+      - release
+
+env:
+  CARGO_TERM_COLOR: always
+  TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+  TAURI_SIGNING_KEY_PASSPHRASE: ${{ secrets.TAURI_SIGNING_KEY_PASSPHRASE }}
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Rust
+        uses: dtolnay/rust-action@stable
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+          
+      - name: Install Tauri dependencies
+        run: |
+          choco install cmake --ignore-dependencies --no-progress
+          choco install visualstudio2022workload-vc-tools --ignore-dependencies --no-progress
+          
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          version: 0.1.0
+          tagName: v__VERSION__  # This replaces __VERSION__ with the actual version
+          releaseName: 'VoxType v__VERSION__'
+          releaseDraft: true
+          prerelease: false

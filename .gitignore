@@ -14,6 +14,7 @@
 # misc
 .DS_Store
 *.pem
+*.pdb
 
 # debug
 npm-debug.log*
@@ -24,15 +25,24 @@ yarn-error.log*
 .env*.local
 .env
 
-# tauri
-src-tauri/target/
-src-tauri/cargo-lock
-src-tauri/*.so
-src-tauri/*.dylib
-src-tauri/*.dll
-
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
+
+# build output
+target/
+src-tauri/target/
+src-tauri/cargo-lock
+
+# model cache
+models/CACHEDIR.TAG
+models/models--openai--whisper-tiny/blobs/*
+models/models--openai--whisper-tiny/refs/*
+models/models--openai--whisper-tiny/.no_exist
+**models--openai--whisper-tiny/**/*.pt
+**models--openai--whisper-tiny/**/*.bin
+
+# build tools
+.vs_buildtools.exe
