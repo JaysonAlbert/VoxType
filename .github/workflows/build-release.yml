@@ -50,9 +50,8 @@ jobs:
           echo "✓ Version validated: $pkg_version"
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-action@stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          toolchain: stable
           components: rustfmt, clippy
 
       - name: Install Windows dependencies
