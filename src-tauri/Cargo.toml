@@ -16,6 +16,8 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2.0.0", features = [] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+whisper-rs = { version = "0.16.0", features = ["log_backend"] }
+hound = "3"
 
 [features]
 default = ["custom-protocol"]

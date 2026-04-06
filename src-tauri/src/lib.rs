@@ -52,9 +52,9 @@ fn get_asr_status(state: State<'_, AsrService>) -> Result<AsrStatus, String> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let asr = AsrService::new();
     tauri::Builder::default()
         .setup(|app| {
-            let asr = AsrService::new();
             app.manage(asr);
             Ok(())
         })

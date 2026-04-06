@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "identifier": "com.voxtype.app",
   "build": {
-    "devUrl": "http://localhost:1420"
+    "devUrl": "http://localhost:1420",
+    "frontendDist": "../dist"
   },
   "app": {
     "windows": [
@@ -23,6 +24,9 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "icon": []
+    "icon": [
+      "icons/icon.ico",
+      "icons/icon.png"
+    ]
   }
 }
