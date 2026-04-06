@@ -1,0 +1,52 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Get version from package.json
+        id: package-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-action@stable
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+
+      - name: Install Windows dependencies
+        run: |
+          choco install cmake -y --no-progress
+          choco install visualstudio2022workload-vc-tools -y --no-progress
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: ${{ steps.package-version.outputs.version }}
+          tagName: v${{ steps.package-version.outputs.version }}
+          releaseTitle: 'VoxType v${{ steps.package-version.outputs.version }}'
+          releaseBody: |
+            ## VoxType v${{ steps.package-version.outputs.version }}
+            
+            Latest release with native Whisper-rs integration.
