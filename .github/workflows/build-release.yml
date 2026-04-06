@@ -34,20 +34,22 @@ jobs:
 
       - name: Validate version from branch name
         run: |
-          branch_version=${{ steps.branch-name.outputs.version }}
-          pkg_version=${{ steps.package-version.outputs.version }}
+          $branch_version="${{ steps.branch-name.outputs.version }}"
+          $pkg_version="${{ steps.package-version.outputs.version }}"
           
-          if [[ ! "$branch_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Error: Branch name must be in semver format (e.g., 0.0.1, 1.2.3)"
+          if ([regex]::IsMatch($branch_version, '^\d+\.\d+\.\d+$')) {
+            Write-Host "✓ branch_version matched: $branch_version"
+          } else {
+            Write-Error "Branch name '$branch_version' is not in semver format (e.g., 0.0.1, 1.2.3)"
             exit 1
-          fi
+          }
           
-          if [[ "$branch_version" != "$pkg_version" ]]; then
-            echo "Error: Version mismatch between branch name '$branch_version' and package.json '$pkg_version'"
+          if ($branch_version -eq $pkg_version) {
+            Write-Host "✓ Versions match: $pkg_version"
+          } else {
+            Write-Error "Version mismatch: branch '$branch_version' does not match package.json '$pkg_version'"
             exit 1
-          fi
-          
-          echo "✓ Version validated: $pkg_version"
+          }
 
       - name: Install Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
