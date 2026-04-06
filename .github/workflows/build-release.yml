@@ -3,7 +3,9 @@ name: Build and Release
 on:
   push:
     branches:
-      - release
+      - '0.*'
+      - '0.1.*'
+      - '1.*'
 
 jobs:
   build:
@@ -11,6 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -18,10 +22,32 @@ jobs:
           node-version: 20
           cache: 'npm'
 
+      - name: Get current branch name
+        id: branch-name
+        run: echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+        shell: bash
+
       - name: Get version from package.json
         id: package-version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
         shell: bash
+
+      - name: Validate version from branch name
+        run: |
+          branch_version=${{ steps.branch-name.outputs.version }}
+          pkg_version=${{ steps.package-version.outputs.version }}
+          
+          if [[ ! "$branch_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Branch name must be in semver format (e.g., 0.0.1, 1.2.3)"
+            exit 1
+          fi
+          
+          if [[ "$branch_version" != "$pkg_version" ]]; then
+            echo "Error: Version mismatch between branch name '$branch_version' and package.json '$pkg_version'"
+            exit 1
+          fi
+          
+          echo "✓ Version validated: $pkg_version"
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-action@stable
@@ -49,4 +75,6 @@ jobs:
           releaseBody: |
             ## VoxType v${{ steps.package-version.outputs.version }}
             
-            Latest release with native Whisper-rs integration.
+            - Native Whisper-rs integration
+            - Improved speech recognition
+            - Single executable installer
